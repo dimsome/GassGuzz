@@ -1,9 +1,8 @@
 {
-    "name": "solidity-next-js-starter-contracts",
-    "version": "2.0.0",
-    "description": "A basic contract for starting to build full stack Ethereum dApps",
-    "main": "index.js",
-    "author": "Tom Hirst <hello@tomhirst.com>",
+    "name": "gassguzz-contracts",
+    "version": "0.0.1",
+    "description": "Contracts for GasGuzz",
+    "author": "Dimitri Golecko <dimitri@golecko.de>",
     "license": "MIT",
     "scripts": {
         "start": "hardhat node",
