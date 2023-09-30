@@ -14,11 +14,13 @@
         "format": "prettier --write \"./contracts/**/*.sol\" --plugin prettier-plugin-solidity && prettier --write \"./**/*.ts\""
     },
     "devDependencies": {
+        "@chainlink/contracts-ccip": "^0.7.6",
         "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
         "@nomicfoundation/hardhat-ethers": "^3.0.4",
         "@nomicfoundation/hardhat-network-helpers": "^1.0.9",
         "@nomicfoundation/hardhat-toolbox": "^3.0.0",
         "@nomicfoundation/hardhat-verify": "^1.1.1",
+        "@openzeppelin/contracts": "^4.9.3",
         "@typechain/ethers-v6": "^0.5.0",
         "@typechain/hardhat": "^9.0.0",
         "chai": "^4.3.8",
