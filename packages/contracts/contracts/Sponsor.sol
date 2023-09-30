@@ -3,6 +3,8 @@ pragma solidity ^0.8.20;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import "@openzeppelin/contracts/interfaces/IERC721.sol";
 
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
@@ -14,6 +16,14 @@ contract Sponsor is CCIPReceiver, ERC721 {
     struct DepositData {
         address depositor;
         uint256 amount;
+    }
+
+    struct CallData {
+        bytes32 hash;
+        bytes signature;
+        bytes executionData;
+        uint256 maxGas;
+        bytes gasSignature;
     }
 
     event MessageReceived(
@@ -40,7 +50,7 @@ contract Sponsor is CCIPReceiver, ERC721 {
 
     // ERC6551-related state variables
     IERC6551Registry public immutable registry;
-    address public immutable implementation;
+    address payable public immutable implementation;
     uint256 public immutable registryChainId;
     uint256 public immutable salt;
 
@@ -52,7 +62,7 @@ contract Sponsor is CCIPReceiver, ERC721 {
         string memory _name,
         string memory _symbol,
         address registry_,
-        address implementation_,
+        address payable implementation_,
         uint256 registryChainId_,
         uint256 salt_
     ) CCIPReceiver(_router) ERC721(_name, _symbol) {
@@ -120,6 +130,7 @@ contract Sponsor is CCIPReceiver, ERC721 {
         (uint256 tokenId, ) = _mintToken(sender);
 
         // Set allowance for tokenId
+        allowances[tokenId] = decodedData.amount;
 
         emit MessageReceived(
             any2EvmMessage.messageId,
@@ -146,9 +157,46 @@ contract Sponsor is CCIPReceiver, ERC721 {
         );
     }
 
+    function executeCall(
+        address to,
+        uint256 value,
+        bytes calldata data
+    ) external payable returns (bytes memory result) {
+        CallData memory callData = abi.decode(data, (CallData));
+        // Only callable with a valid singature from owner
+
+        bytes4 magicValue = IERC6551Account(implementation).isValidSignature(
+            callData.hash,
+            callData.signature
+        );
+        require(
+            magicValue == IERC1271.isValidSignature.selector,
+            "Invalid signature"
+        );
+
+        // Check singature for maxGas
+        magicValue = IERC6551Account(implementation).isValidSignature(
+            keccak256(abi.encodePacked(callData.maxGas)),
+            callData.gasSignature
+        );
+        require(
+            magicValue == IERC1271.isValidSignature.selector,
+            "Invalid signature"
+        );
+
+        IERC6551Account(implementation).executeCall(
+            to,
+            value,
+            callData.executionData
+        );
+
+        // Transfer the maxGas to the sender
+        payable(msg.sender).transfer(callData.maxGas);
+    }
+
     function supportsInterface(
         bytes4 interfaceId
-    ) public pure override(ERC721, CCIPReceiver) returns (bool) {
+    ) public pure virtual override(ERC721, CCIPReceiver) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

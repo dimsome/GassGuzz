@@ -1,8 +1,8 @@
 {
-    "name": "solidity-nextjs-starter",
-    "version": "2.0.0",
-    "description": "A starter kit for building full stack Ethereum dApps with Solidity and Next.js",
-    "author": "Tom Hirst <hello@tomhirst.com>",
+    "name": "gassguzz-contracts",
+    "version": "0.0.1",
+    "description": "Simple project to allow executing transactions on L2, without bridging to it. All the while still earning from staking.",
+    "author": "Dimitri Golecko <dimitri@golecko.de>",
     "license": "MIT",
     "private": true,
     "engines": {
@@ -12,8 +12,8 @@
         "packages/*"
     ],
     "scripts": {
-        "start:contracts": "yarn workspace solidity-next-js-starter-contracts run start",
-        "start:app": "yarn workspace solidity-next-js-starter-app run dev"
+        "start:contracts": "yarn workspace contracts run start",
+        "start:relayer": "yarn workspace relayer run dev"
     },
     "devDependencies": {
         "@typechain/ethers-v6": "^0.4.3",

@@ -12,6 +12,7 @@ import "./lib/ERC6551AccountLib.sol";
 /// @author https://etherscan.io/address/0x02101dfb77fde026414827fdc604ddaf224f0921#code
 contract PackdAccount is IERC6551Account {
     uint256 public nonce;
+    address public sponsor;
 
     receive() external payable {}
 
@@ -21,21 +22,18 @@ contract PackdAccount is IERC6551Account {
         bytes executionData;
     }
 
+    constructor(address _sponsor) {
+        sponsor = _sponsor;
+    }
+
     function executeCall(
         address to,
         uint256 value,
         bytes calldata data
     ) external payable returns (bytes memory result) {
-        // Unpack call data
+        // Only callable via Sponsor Contract
+        require(msg.sender == sponsor, "Only callable via Sponsor Contract");
 
-        CallData memory callData = abi.decode(data, (CallData));
-        // Only callable with a valid singature from owner
-
-        bytes4 magicValue = isValidSignature(callData.hash, callData.signature);
-        require(
-            magicValue == IERC1271.isValidSignature.selector,
-            "Invalid signature"
-        );
         ++nonce;
 
         emit TransactionExecuted(to, value, data);
