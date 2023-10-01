@@ -196,7 +196,7 @@ contract Sponsor is CCIPReceiver, ERC721 {
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public pure virtual override(ERC721, CCIPReceiver) returns (bool) {
+    ) public view override(CCIPReceiver, ERC721) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
